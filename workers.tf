@@ -46,5 +46,5 @@ resource "google_compute_instance_group_manager" "workers" {
   instance_template  = "${google_compute_instance_template.worker.self_link}"
   base_instance_name = "swarm-worker"
   zone               = "${var.gce_region}-b"
-  target_size        = "1"
+  target_size        = "${var.worker_instance_count}"
 }

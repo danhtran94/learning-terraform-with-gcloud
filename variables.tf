@@ -25,7 +25,7 @@ variable "gce_creds_path" {
 }
 
 variable "manager_instance_count" {
-  default = 2
+  default = 1
 }
 
 variable "gce_project" {
