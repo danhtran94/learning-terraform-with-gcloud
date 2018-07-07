@@ -48,3 +48,19 @@ resource "google_compute_instance_group_manager" "workers" {
   zone               = "${var.gce_region}-b"
   target_size        = "${var.worker_instance_count}"
 }
+
+resource "google_compute_autoscaler" "swarm_scaler" {
+  name   = "swarm-worker-scaler"
+  zone   = "${var.gce_region}-b"
+  target = "${google_compute_instance_group_manager.workers.self_link}"
+
+  autoscaling_policy = {
+    max_replicas    = 3
+    min_replicas    = 1
+    cooldown_period = 60
+
+    cpu_utilization {
+      target = 0.5
+    }
+  }
+}
