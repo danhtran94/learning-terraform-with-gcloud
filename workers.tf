@@ -41,7 +41,7 @@ resource "google_compute_instance_template" "worker" {
   depends_on = ["google_compute_instance.manager"]
 }
 
-resource "google_compute_instance_group_manager" "workers" {
+resource "google_compute_instance_group_manager" "swarm_workers" {
   name               = "swarm-worker-group"
   instance_template  = "${google_compute_instance_template.worker.self_link}"
   base_instance_name = "swarm-worker"
@@ -52,10 +52,10 @@ resource "google_compute_instance_group_manager" "workers" {
 resource "google_compute_autoscaler" "swarm_scaler" {
   name   = "swarm-worker-scaler"
   zone   = "${var.gce_region}-b"
-  target = "${google_compute_instance_group_manager.workers.self_link}"
+  target = "${google_compute_instance_group_manager.swarm_workers.self_link}"
 
   autoscaling_policy = {
-    max_replicas    = 3
+    max_replicas    = 1
     min_replicas    = 1
     cooldown_period = 60
 
@@ -63,4 +63,41 @@ resource "google_compute_autoscaler" "swarm_scaler" {
       target = 0.5
     }
   }
+}
+
+resource "google_compute_backend_service" "swarm_worker" {
+  name             = "swarm-worker-backend"
+  port_name        = "http"
+  protocol         = "HTTP"
+  timeout_sec      = "10"
+  session_affinity = "NONE"
+
+  backend {
+    group = "${google_compute_instance_group_manager.swarm_workers.instance_group}"
+  }
+
+  health_checks = ["${google_compute_http_health_check.swarm_worker_health.self_link}"]
+}
+
+resource "google_compute_http_health_check" "swarm_worker_health" {
+  name               = "hcheck-swarm-worker"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
+
+resource "google_compute_url_map" "swarm_worker" {
+  name            = "url-swarm-worker-map"
+  default_service = "${google_compute_backend_service.swarm_worker.self_link}"
+}
+
+resource "google_compute_target_http_proxy" "swarm_worker_thprx" {
+  name    = "http-swarm-sworker-proxy"
+  url_map = "${google_compute_url_map.swarm_worker.self_link}"
+}
+
+resource "google_compute_global_forwarding_rule" "swarm_worker_gfr" {
+  name       = "forwarding-swarm-worker-rule"
+  target     = "${google_compute_target_http_proxy.swarm_worker_thprx.self_link}"
+  port_range = "80"
 }

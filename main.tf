@@ -24,6 +24,10 @@ resource "null_resource" "get_worker_token" {
     command = "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${var.ssh_user}@${google_compute_instance.manager.0.network_interface.0.access_config.0.assigned_nat_ip} sudo docker swarm join-token worker -q > ${path.module}/worker.token"
   }
 
+  provisioner "local-exec" {
+    command = "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${var.ssh_user}@${google_compute_instance.manager.0.network_interface.0.access_config.0.assigned_nat_ip} sudo docker swarm join-token manager -q > ${path.module}/manager.token"
+  }
+
   depends_on = ["google_compute_instance.manager"]
 }
 
