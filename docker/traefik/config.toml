@@ -1,0 +1,16 @@
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+
+[ping]
+entryPoint = "http"
+
+[api]
+entryPoint = "traefik"
+dashboard = true
+
+[docker]
+domain = "docker.localhost"
+watch = true
+swarmMode = true
+exposedByDefault = false

@@ -2,7 +2,7 @@ resource "google_compute_instance_template" "worker" {
   name_prefix  = "swarm-worker-"
   project      = "${var.gce_project}"
   region       = "${var.gce_region}"
-  tags         = ["worker-instance-template"]
+  tags         = ["worker-instance-template", "swarm", "worker"]
   machine_type = "${var.gce_instance_size}"
 
   scheduling {
@@ -81,7 +81,7 @@ resource "google_compute_backend_service" "swarm_worker" {
 
 resource "google_compute_http_health_check" "swarm_worker_health" {
   name               = "hcheck-swarm-worker"
-  request_path       = "/"
+  request_path       = "/ping"
   check_interval_sec = 1
   timeout_sec        = 1
 }
