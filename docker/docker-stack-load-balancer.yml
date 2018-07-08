@@ -7,6 +7,8 @@ configs:
 services:
   reverse-proxy:
     image: traefik
+    networks:
+      - southeast
     deploy:
       replicas: 1
       placement:
@@ -26,4 +28,8 @@ services:
       target: /etc/traefik/traefik.toml
       mode: 444
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+  southeast:
+    external: true

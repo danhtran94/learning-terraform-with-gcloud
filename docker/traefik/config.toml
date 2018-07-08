@@ -1,3 +1,5 @@
+logLevel = "DEBUG"
+
 [entryPoints]
   [entryPoints.http]
   address = ":80"
@@ -10,7 +12,7 @@ entryPoint = "traefik"
 dashboard = true
 
 [docker]
-domain = "docker.localhost"
+domain = "traefik"
 watch = true
 swarmMode = true
 exposedByDefault = false
